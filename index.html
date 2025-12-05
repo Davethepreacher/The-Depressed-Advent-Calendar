@@ -350,6 +350,10 @@
             z-index: 10;
         }
 
+        .day.disabled .content {
+            visibility: hidden;
+        }
+
         /* Today highlight */
         .day.today .door-front {
             border-color: var(--gold-light);
@@ -597,19 +601,13 @@
                 });
                 
                 if (!day.classList.contains('open')) {
-                    // First click: open door and play video (muted)
                     day.classList.add('open');
-                    setTimeout(() => {
-                        const video = document.getElementById(videoId);
-                        video.muted = true;
-                        video.currentTime = 0;
-                        video.play();
-                        day.querySelector('.video-overlay').style.display = 'none';
-                    }, 600);
-                } else {
-                    // Second click: open modal with loader
-                    showModal(i, creature);
                 }
+                
+                // Open modal directly with loader
+                setTimeout(() => {
+                    showModal(i, creature);
+                }, 600);
             });
             
             calendar.appendChild(day);
