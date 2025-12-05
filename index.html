@@ -279,6 +279,51 @@
             letter-spacing: 0.1em;
         }
 
+        /* Video loader */
+        .video-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--wood-mid);
+            border-top-color: var(--gold-light);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .modal-video-container {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            margin: 0 auto;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .modal-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-video-container video.loaded {
+            opacity: 1;
+        }
+
+        .modal-video-container .video-loader {
+            z-index: 5;
+        }
+
         /* Disabled future days */
         .day.disabled {
             pointer-events: none;
@@ -546,25 +591,19 @@
             `;
             
             day.addEventListener('click', () => {
-                // Stop all videos
+                // Stop all small videos
                 document.querySelectorAll('.creature-video').forEach(v => {
                     v.pause();
                 });
                 
                 if (!day.classList.contains('open')) {
-                    // First click: open door and play video (muted)
                     day.classList.add('open');
-                    setTimeout(() => {
-                        const video = document.getElementById(videoId);
-                        video.muted = true;
-                        video.currentTime = 0;
-                        video.play();
-                        day.querySelector('.video-overlay').style.display = 'none';
-                    }, 600);
-                } else {
-                    // Second click: open modal with sound
-                    showModal(i, creature);
                 }
+                
+                // Open modal directly
+                setTimeout(() => {
+                    showModal(i, creature);
+                }, 600);
             });
             
             calendar.appendChild(day);
@@ -574,10 +613,25 @@
             document.getElementById('modal-day-num').textContent = creature.day;
             const modalCreature = document.getElementById('modal-creature');
             modalCreature.innerHTML = `
-                <video autoplay loop style="width: 100%; max-width: 350px; border-radius: 8px; aspect-ratio: 1;">
-                    <source src="${creature.video}" type="video/mp4">
-                </video>
+                <div class="modal-video-container">
+                    <div class="video-loader"></div>
+                    <video loop playsinline>
+                        <source src="${creature.video}" type="video/mp4">
+                    </video>
+                </div>
             `;
+            
+            const video = modalCreature.querySelector('video');
+            const loader = modalCreature.querySelector('.video-loader');
+            
+            video.addEventListener('canplaythrough', () => {
+                loader.style.display = 'none';
+                video.classList.add('loaded');
+                video.play();
+            }, { once: true });
+            
+            video.load();
+            
             document.getElementById('modal-name').textContent = creature.name;
             document.getElementById('modal-prompt').textContent = creature.prompt;
             document.getElementById('modal').classList.add('active');
