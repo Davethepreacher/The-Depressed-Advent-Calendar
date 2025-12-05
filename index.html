@@ -597,13 +597,19 @@
                 });
                 
                 if (!day.classList.contains('open')) {
+                    // First click: open door and play video (muted)
                     day.classList.add('open');
-                }
-                
-                // Open modal directly
-                setTimeout(() => {
+                    setTimeout(() => {
+                        const video = document.getElementById(videoId);
+                        video.muted = true;
+                        video.currentTime = 0;
+                        video.play();
+                        day.querySelector('.video-overlay').style.display = 'none';
+                    }, 600);
+                } else {
+                    // Second click: open modal with loader
                     showModal(i, creature);
-                }, 600);
+                }
             });
             
             calendar.appendChild(day);
